@@ -5,18 +5,14 @@ export default class NewsApiService {
     }
 
     fetchImages() {
-        // console.log('до:', this);
         const url = `https://pixabay.com/api/?image_type=photo&orientation=horizontal&q=${this.searchQuery}&page=${this.page}&per_page=12&key=23238437-0207b31bcaea78a79b03733f3`;
 
         return fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                // console.log(data);
+            .then(response => response.json())
+            .then(({hits}) => {
                 this.incrementPage();
-                console.log(this);
+                return hits;
             });
-
-                // return data.images;
     }
 
     incrementPage() {

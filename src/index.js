@@ -1,29 +1,54 @@
+import imagesTpl from './templates/images.hbs';
 import './sass/main.scss';
-import NewsApiService from './js/news-service';
-// 23238437-0207b31bcaea78a79b03733f3
-
+import NewsApiService from './js/apiService';
+import LoadMoreBtn from './js/load-more';
 
 const refs = {
     searchForm: document.querySelector('#search-form'),
     container: document.querySelector('.gallery'),
-    loadMoreBtn: document.querySelector('[data-action="load-more"]')
 };
+
+const loadMoreBtn = new LoadMoreBtn({
+    selector: '[data-action="load-more"]',
+    hidden: true,
+});
+
 const newsApiService = new NewsApiService();
 
+
 refs.searchForm.addEventListener('submit', onSearch);
-refs.loadMoreBtn.addEventListener('click', onLoadMore);
+loadMoreBtn.refs.button.addEventListener('click', fetchImages);
 
 function onSearch(ev) {
     ev.preventDefault();
 
     newsApiService.query = ev.currentTarget.elements.query.value;
+    if (newsApiService.query === '') {
+        return alert('Error');
+    }
+
+    loadMoreBtn.show();
     newsApiService.resetPage();
-    newsApiService.fetchImages();
-        // .then(images => console.log(images))
+    clearContainer();
+    fetchImages();  
 }
 
-function onLoadMore() {
-    newsApiService.fetchImages();
-        // .then(images => console.log(images))
+function fetchImages() {
+    loadMoreBtn.disable();
+    newsApiService.fetchImages()
+        .then(hits => {
+            createImageGallery(hits);
+
+            loadMoreBtn.enable();
+
+            refs.container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        });
 }
 
+function createImageGallery(hits) {
+    refs.container.insertAdjacentHTML('beforeend', imagesTpl(hits));
+}
+
+function clearContainer() {
+    refs.container.innerHTML = '';
+}
