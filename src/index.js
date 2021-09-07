@@ -3,6 +3,8 @@ import './sass/main.scss';
 import NewsApiService from './js/apiService';
 import LoadMoreBtn from './js/load-more';
 
+import { PNotifyEmptyInput, PNotifyError } from './js/pnotify.js';
+
 const refs = {
     searchForm: document.querySelector('#search-form'),
     container: document.querySelector('.gallery'),
@@ -24,7 +26,7 @@ function onSearch(ev) {
 
     newsApiService.query = ev.currentTarget.elements.query.value;
     if (newsApiService.query === '') {
-        return alert('Error');
+        return PNotifyEmptyInput();
     }
 
     loadMoreBtn.show();
@@ -40,8 +42,12 @@ function fetchImages() {
             createImageGallery(hits);
 
             loadMoreBtn.enable();
-
             refs.container.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+            if (hits.length === 0) {
+                loadMoreBtn.hide();
+                PNotifyError();
+            }
         });
 }
 
